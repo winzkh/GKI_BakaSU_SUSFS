@@ -182,6 +182,7 @@ Actions artifact names usually look like this:
 | Normal build | `BakaSU_kernel-android15-6.6.92-2025-07` | `android15-6.6.92-2025-07-BakaSU-AnyKernel3.zip` |
 | With revision | `BakaSU_kernel-android13-5.10.198-2023-12-r7` | `android13-5.10.198-2023-12-r7-BakaSU-AnyKernel3.zip` |
 | Clean build | `Clean_kernel-android15-6.6.92-2025-07` | `android15-6.6.92-2025-07-Clean-AnyKernel3.zip` |
+| Without BakaSU | `NoKSU_kernel-android15-6.6.92-2025-07` | `android15-6.6.92-2025-07-NoKSU-AnyKernel3.zip` |
 
 The **Artifacts download is always a ZIP**. Extract only that outer layer; the `...-AnyKernel3.zip` inside is the flashable package. **Do not extract the AK3 ZIP itself.** Artifacts may expire, so download them soon after the run.
 
@@ -222,6 +223,7 @@ If the phone does not boot, restore the boot image you backed up and do not keep
 | `version` | Empty | Optional local kernel version suffix. It is not the kernel version; it changes the `uname -r` suffix. Usually leave it empty. |
 | `build_time` | `Sun Dec 01 08:10:00 UTC 2024` | Clear it or enter `N` to use the current UTC time; or enter a timestamp string such as `Sun Dec 01 08:10:00 UTC 2024`. |
 | `clean_build` | `false` | Skips BakaSU, SUSFS, and optional feature patches; the artifact is named `Clean_kernel-...`. Do not check it if you want root. `build_bypass` still triggers an extra compilation. |
+| `disable_ksu` | `false` | Skips **BakaSU only**. KSU and its dependent SUSFS are left out; ZRAM, BBG, Re-Kernel, Droidspaces, NoMount and the rest keep their current settings. The artifact is named `NoKSU_kernel-...`. SUSFS cannot work without KernelSU, so it is skipped automatically. |
 
 ### Feature switches
 

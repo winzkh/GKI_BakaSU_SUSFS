@@ -76,6 +76,10 @@ on:
         description: "Clean build (without KernelSU, SUSFS, or optional patches)"
         type: boolean
         default: false
+      disable_ksu:
+        description: "Do not integrate BakaSU (SUSFS is skipped automatically; other switches unchanged)"
+        type: boolean
+        default: false
 
       use_zram:
         description: "Enable enhanced ZRAM algorithms"
@@ -158,6 +162,7 @@ jobs:
     secrets: inherit
     with:
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       android_version: ${{ inputs.android_version }}
       kernel_version: ${{ inputs.kernel_version }}
       sub_level: ${{ inputs.sub_level }}

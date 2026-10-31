@@ -182,6 +182,7 @@ Actions 的 Artifact 名称通常长这样：
 | 普通构建 | `BakaSU_kernel-android15-6.6.92-2025-07` | `android15-6.6.92-2025-07-BakaSU-AnyKernel3.zip` |
 | 带 revision | `BakaSU_kernel-android13-5.10.198-2023-12-r7` | `android13-5.10.198-2023-12-r7-BakaSU-AnyKernel3.zip` |
 | Clean build | `Clean_kernel-android15-6.6.92-2025-07` | `android15-6.6.92-2025-07-Clean-AnyKernel3.zip` |
+| 不集成 BakaSU | `NoKSU_kernel-android15-6.6.92-2025-07` | `android15-6.6.92-2025-07-NoKSU-AnyKernel3.zip` |
 
 GitHub 的 **Artifacts 下载下来是一个 ZIP**；只解压这一层，里面那个 `...-AnyKernel3.zip` 才是刷机包。**AK3 ZIP 本身不要再解压。** Artifacts 可能会过期，建议跑完尽快下载。
 
@@ -222,6 +223,7 @@ GitHub 的 **Artifacts 下载下来是一个 ZIP**；只解压这一层，里面
 | `version` | 空 | 可选的内核本地版本后缀。它不是内核版本；填了会改 `uname -r` 后缀，一般留空。 |
 | `build_time` | `Sun Dec 01 08:10:00 UTC 2024` | 清空或填 `N` 用当前 UTC 时间；也可以填 `Sun Dec 01 08:10:00 UTC 2024` 这种时间字符串。 |
 | `clean_build` | `false` | 勾选后不集成 BakaSU、SUSFS 和可选功能补丁，产物是 `Clean_kernel-...`。要 root 就别勾；`build_bypass` 仍会额外编译一次。 |
+| `disable_ksu` | `false` | 勾选后**不集成 BakaSU**，只跳过 KSU 和依赖它的 SUSFS；ZRAM/BBG/Re-Kernel/Droidspaces/NoMount 等开关照常生效，产物是 `NoKSU_kernel-...`。SUSFS 无法脱离 KernelSU 使用，会自动跳过。 |
 
 ### 功能开关
 

@@ -28,6 +28,10 @@ on:
         required: false
         type: boolean
         default: false
+      disable_ksu:
+        required: false
+        type: boolean
+        default: false
       kernelsu_branch:
         required: true
         type: string
@@ -97,6 +101,7 @@ jobs:
     secrets: inherit
     with:
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       android_version: ${{ matrix.android_version }}
       kernel_version: ${{ matrix.kernel_version }}
       sub_level: ${{ matrix.sub_level }}

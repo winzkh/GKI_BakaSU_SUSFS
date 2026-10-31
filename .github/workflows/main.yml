@@ -77,6 +77,10 @@ on:
         description: "Clean build (without KernelSU, SUSFS, or optional patches)"
         type: boolean
         default: false
+      disable_ksu:
+        description: "Do not integrate BakaSU (SUSFS is skipped automatically; other switches unchanged)"
+        type: boolean
+        default: false
 
       use_zram:
         description: "Enable enhanced ZRAM algorithms"
@@ -156,7 +160,7 @@ jobs:
     steps:
       - name: 固定 BakaSU 构建提交
         id: resolve
-        if: inputs.clean_build != true
+        if: ${{ inputs.clean_build != true && inputs.disable_ksu != true }}
         env:
           KSU_BRANCH: ${{ inputs.kernelsu_branch || 'main' }}
         run: |
@@ -237,6 +241,7 @@ jobs:
     secrets: inherit
     with:
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       android_version: ${{ matrix.android_version }}
       kernel_version: ${{ matrix.kernel_version }}
       sub_level: ${{ matrix.sub_level }}
@@ -267,6 +272,7 @@ jobs:
       data_file: data/android12/5.10.json
       deduplicate_sublevels: false
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -291,6 +297,7 @@ jobs:
       data_file: data/android13/5.10.json
       deduplicate_sublevels: false
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -315,6 +322,7 @@ jobs:
       data_file: data/android13/5.15.json
       deduplicate_sublevels: true
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -339,6 +347,7 @@ jobs:
       data_file: data/android14/5.15.json
       deduplicate_sublevels: true
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -363,6 +372,7 @@ jobs:
       data_file: data/android14/6.1.json
       deduplicate_sublevels: true
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -387,6 +397,7 @@ jobs:
       data_file: data/android15/6.6.json
       deduplicate_sublevels: true
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -411,6 +422,7 @@ jobs:
       data_file: data/android16/6.12.json
       deduplicate_sublevels: true
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -435,6 +447,7 @@ jobs:
       data_file: data/android17/6.18.json
       deduplicate_sublevels: true
       clean_build: ${{ inputs.clean_build }}
+      disable_ksu: ${{ inputs.disable_ksu }}
       kernelsu_branch: ${{ needs.resolve-ksu-ref.outputs.sha || 'main' }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
@@ -517,7 +530,7 @@ jobs:
       REPO_OWNER: ${{ github.repository_owner }}
       REPO_NAME: ${{ github.event.repository.name }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NOTIFY_SUSFS_STATUS: ${{ inputs.clean_build != true && inputs.cancel_susfs != true && inputs.build_target == 'android17-6.18' && 'auto-skipped (Android 17/6.18)' || inputs.clean_build != true && inputs.cancel_susfs != true && inputs.build_target == 'all' && 'enabled (Android 17/6.18 auto-skipped)' || inputs.clean_build != true && inputs.cancel_susfs != true && 'true' || 'false' }}
+      NOTIFY_SUSFS_STATUS: ${{ inputs.disable_ksu != true && (inputs.clean_build != true && inputs.cancel_susfs != true && inputs.build_target == 'android17-6.18' && 'auto-skipped (Android 17/6.18)' || inputs.clean_build != true && inputs.cancel_susfs != true && inputs.build_target == 'all' && 'enabled (Android 17/6.18 auto-skipped)' || inputs.clean_build != true && inputs.cancel_susfs != true && 'true') || 'false' }}
       NOTIFY_ZRAM_STATUS: ${{ inputs.clean_build != true && inputs.use_zram && inputs.build_target == 'android17-6.18' && 'auto-skipped (Android 17/6.18)' || inputs.clean_build != true && inputs.use_zram && inputs.build_target == 'all' && 'enabled (Android 17/6.18 auto-skipped)' || inputs.clean_build != true && inputs.use_zram && 'true' || 'false' }}
       NOTIFY_REKERNEL_STATUS: ${{ inputs.clean_build != true && inputs.use_rekernel && inputs.build_target == 'android17-6.18' && 'auto-skipped (Android 17/6.18)' || inputs.clean_build != true && inputs.use_rekernel && inputs.build_target == 'all' && 'enabled (Android 17/6.18 auto-skipped)' || inputs.clean_build != true && inputs.use_rekernel && 'true' || 'false' }}
 
@@ -551,7 +564,15 @@ jobs:
             echo "LZ4_STATUS=$LZ4_STATUS" >> "$GITHUB_ENV"
             echo "LZ4_SUFFIX=$LZ4_SUFFIX" >> "$GITHUB_ENV"
 
-            if [ "${{ inputs.cancel_susfs }}" = "true" ]; then
+            if [ "${{ inputs.disable_ksu }}" = "true" ]; then
+              KSU_NAME="NoKSU"
+              RELEASE_NAME="GKI内核: ${KSU_NAME}"
+              echo "SUSFS_SUFFIX=" >> "$GITHUB_ENV"
+              echo "SUSFS_STATUS=未集成 / Not included" >> "$GITHUB_ENV"
+              echo "HOOK_TYPE=" >> "$GITHUB_ENV"
+              echo "MOUNT_TYPE=" >> "$GITHUB_ENV"
+              echo "BRANCH_INFO=未集成 / Not included" >> "$GITHUB_ENV"
+            elif [ "${{ inputs.cancel_susfs }}" = "true" ]; then
               RELEASE_NAME="GKI内核: ${KSU_NAME}"
               echo "SUSFS_SUFFIX=" >> "$GITHUB_ENV"
               echo "SUSFS_STATUS=未集成 / Not included" >> "$GITHUB_ENV"
@@ -579,7 +600,9 @@ jobs:
               echo "COMPATIBILITY_NOTE=Android 17 / 6.18 自动跳过 SUSFS、ZRAM/LZ4KD、NTSync、Re-Kernel、一加 8E 专用补丁和 CVE-2026-43499 修复链。" >> "$GITHUB_ENV"
             fi
 
-            echo "BRANCH_INFO=(${{ inputs.kernelsu_branch || 'main' }})" >> "$GITHUB_ENV"
+            if [ "${{ inputs.disable_ksu }}" != "true" ]; then
+              echo "BRANCH_INFO=(${{ inputs.kernelsu_branch || 'main' }})" >> "$GITHUB_ENV"
+            fi
           fi
 
           echo "KSU_NAME=$KSU_NAME" >> "$GITHUB_ENV"
@@ -611,7 +634,7 @@ jobs:
           ref: ${{ github.sha }}
 
       - name: 获取 KernelSU 提交信息
-        if: inputs.clean_build != true
+        if: ${{ inputs.clean_build != true && inputs.disable_ksu != true }}
         run: |
           KSU_REF="${{ needs.resolve-ksu-ref.outputs.sha }}"
           KSU_URL="https://github.com/Baka-SU/BakaSU/commit/$KSU_REF"
@@ -620,7 +643,7 @@ jobs:
           echo "KSU_URL=$KSU_URL" >> "$GITHUB_ENV"
 
       - name: 获取 SUSFS 提交信息
-        if: inputs.clean_build != true
+        if: ${{ inputs.clean_build != true && inputs.disable_ksu != true }}
         run: |
           GITLAB_OWNER="simonpunk"
           GITLAB_REPO="susfs4ksu"
@@ -746,7 +769,7 @@ jobs:
           <details>
           <summary>🔗 提交信息 / Commit Info</summary>
 
-          **KernelSU (BakaSU)**: [${{ env.KSU_REF }}](${{ env.KSU_URL }})
+          **KernelSU (BakaSU)**: ${{ inputs.disable_ksu && '未集成 / Not included' || format('[{0}]({1})', env.KSU_REF, env.KSU_URL) }}
 
           **SUSFS4KSU**:
           - gki-android12-5.10: [${{ env.COMMIT_HASH_gki_android12_5_10 }}](${{ env.COMMIT_URL_gki_android12_5_10 }})
@@ -766,10 +789,18 @@ jobs:
           📂 点击下方 **Assets** 展开下载 / Click **Assets** below to download
           EOF
 
+          if [ "${{ inputs.disable_ksu }}" = "true" ]; then
+            sed -i '/^### 📥 推荐模块 \/ Recommended Module$/,+2d' release_body.md
+            sed -i '/^> 💡 \[Unicode 零宽绕过修复\]/d' release_body.md
+            sed -i '/^\*\*SUSFS4KSU\*\*:$/,/^- gki-android16-6.12:/c\**SUSFS4KSU**: 未集成 / Not included' release_body.md
+          fi
+
       - name: 生成版本标签
         run: |
           if [ "${{ inputs.clean_build }}" = "true" ]; then
             SUS_VERSION="clean"
+          elif [ "${{ inputs.disable_ksu }}" = "true" ]; then
+            SUS_VERSION="no-ksu"
           elif [ "${{ inputs.build_target }}" = "android17-6.18" ]; then
             SUS_VERSION="no-susfs"
           else
@@ -873,7 +904,7 @@ jobs:
           Tag: <code>${NEW_TAG}</code>
           
           Features: 
-          <pre>Build mode = ${{ inputs.clean_build && 'Clean' || 'BakaSU' }}
+          <pre>Build mode = ${{ inputs.clean_build && 'Clean' || (inputs.disable_ksu && 'NoKSU' || 'BakaSU') }}
           SuSFS = $NOTIFY_SUSFS_STATUS
           BBG = ${{ inputs.clean_build != true && inputs.use_bbg && 'true' || 'false' }}
           LZ4KD = $NOTIFY_ZRAM_STATUS
@@ -917,7 +948,7 @@ jobs:
           Tag: <code>${NEW_TAG}</code>
           
           Features: 
-          <pre>Build mode = ${{ inputs.clean_build && 'Clean' || 'BakaSU' }}
+          <pre>Build mode = ${{ inputs.clean_build && 'Clean' || (inputs.disable_ksu && 'NoKSU' || 'BakaSU') }}
           SuSFS = $NOTIFY_SUSFS_STATUS
           BBG = ${{ inputs.clean_build != true && inputs.use_bbg && 'true' || 'false' }}
           LZ4KD = $NOTIFY_ZRAM_STATUS
